@@ -7,7 +7,7 @@ Type=simple
 User=paul
 WorkingDirectory=/home/paul/learning-english-chatbot
 EnvironmentFile=/home/paul/learning-english-chatbot/.env
-ExecStart=/usr/bin/python3 -m bot.main
+ExecStart=/home/paul/learning-english-chatbot/.venv/bin/python -m bot.main
 Restart=always
 RestartSec=5
 
