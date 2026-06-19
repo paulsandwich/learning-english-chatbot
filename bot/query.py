@@ -1,6 +1,7 @@
 import os
 import time
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from bot.db import get_conn
 from bot.indexer import search_context
 
@@ -22,12 +23,8 @@ def _normalize(word: str) -> str:
 
 
 def _call_gemini(word: str, context: str | None) -> str:
-    api_key = os.environ["GEMINI_API_KEY"]
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel(
-        model_name="gemini-2.0-flash",
-        system_instruction=SYSTEM_PROMPT if context else SYSTEM_PROMPT_NO_CONTEXT,
-    )
+    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+    system_prompt = SYSTEM_PROMPT if context else SYSTEM_PROMPT_NO_CONTEXT
 
     user_message = f'單字/片語："{word}"'
     if context:
@@ -35,7 +32,11 @@ def _call_gemini(word: str, context: str | None) -> str:
 
     for attempt in range(2):
         try:
-            response = model.generate_content(user_message)
+            response = client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=user_message,
+                config=types.GenerateContentConfig(system_instruction=system_prompt),
+            )
             return response.text.strip()
         except Exception as e:
             if "429" in str(e) and attempt == 0:
