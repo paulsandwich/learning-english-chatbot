@@ -54,6 +54,45 @@ sudo systemctl status podcast-bot
 - `/export` — 匯出完整單字本
 - `/start` — 顯示使用說明
 
+## 逐字稿處理流程
+
+### 1. 接收檔案
+
+把 `.txt` 逐字稿傳給 Bot，程式會驗證副檔名、下載到 `transcripts/` 目錄，並用檔名（去掉 `.txt`）作為這集的識別名稱。例如 `ep123.txt` → episode 名稱 `ep123`。
+
+### 2. 分句與建立索引
+
+程式將逐字稿依 `.`、`?`、`!` 切成一句一句，存入 SQLite FTS5（全文搜尋）索引：
+
+```
+逐字稿原文：
+"I wanted to turn the tables. He was surprised. It worked out well."
+
+切句後存入 SQLite：
+episode | index | sentence
+ep123   | 0     | I wanted to turn the tables.
+ep123   | 1     | He was surprised.
+ep123   | 2     | It worked out well.
+```
+
+重複上傳同一集時，舊索引會先刪除再重建。
+
+### 3. 查詢時自動帶入情境
+
+輸入 `turn the tables` 後，Bot 會先用 FTS5 搜尋找出包含這個詞的句子，再取前後各一句組成上下文視窗，一起傳給 Gemini：
+
+```
+傳給 Gemini 的內容：
+  單字/片語："turn the tables"
+  Podcast 原句上下文：I wanted to turn the tables. He was surprised.
+```
+
+Gemini 看到的是這個詞在 Podcast 裡的真實用法，因此解釋比單純查字典更精準，會說明在這段對話的語氣與含義。
+
+### 4. 快取
+
+查詢結果會存入 SQLite `cache` 資料表。同一個詞再次查詢時直接回傳快取，不再呼叫 Gemini API。
+
 ## 專案結構
 
 ```
