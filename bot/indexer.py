@@ -19,16 +19,20 @@ def index_transcript(file_path: str | Path, episode_name: str) -> int:
             "INSERT INTO sentences (episode_name, sentence_index, sentence_text) VALUES (?, ?, ?)",
             [(episode_name, i, s) for i, s in enumerate(sentences)],
         )
+        conn.execute("DELETE FROM cache WHERE context_sentence IS NULL")
 
     return len(sentences)
 
 
 def search_context(query: str) -> str | None:
     with get_conn() as conn:
-        row = conn.execute(
-            "SELECT episode_name, sentence_index FROM sentences WHERE sentence_text MATCH ? LIMIT 1",
-            (query,),
-        ).fetchone()
+        try:
+            row = conn.execute(
+                "SELECT episode_name, sentence_index FROM sentences WHERE sentence_text MATCH ? LIMIT 1",
+                (query,),
+            ).fetchone()
+        except Exception:
+            return None
 
         if row is None:
             return None
