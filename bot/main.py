@@ -13,7 +13,7 @@ from telegram.ext import (
 )
 
 from bot.db import init_db
-from bot import indexer, query, vocab
+from bot import indexer, query, vocab, grammar
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
@@ -30,6 +30,8 @@ START_TEXT = """👋 歡迎使用 Podcast 英文學習 Bot！
 指令：
 /list — 查看最近查過的 50 個單字
 /export — 匯出完整單字本
+/review <關鍵字> — 查詢英文文法（例：/review 現在完成式）
+/grammarlist — 列出所有文法主題
 /start — 顯示此說明"""
 
 
@@ -52,6 +54,38 @@ async def export_vocab(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if len(text) > 4096:
         text = text[:4090] + "\n..."
     await update.message.reply_text(text)
+
+
+async def review_grammar(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    keyword = " ".join(context.args).strip() if context.args else ""
+    if not keyword:
+        await update.message.reply_text("請輸入文法關鍵字，例如：/review 現在完成式")
+        return
+
+    topics = grammar.search_topics(keyword)
+    if not topics:
+        await update.message.reply_text(
+            f"找不到「{keyword}」相關的文法。輸入 /grammarlist 查看所有文法清單。"
+        )
+    elif len(topics) == 1:
+        await update.message.reply_text(grammar.format_topic(topics[0]))
+    else:
+        await update.message.reply_text(grammar.format_candidates(topics))
+
+
+async def grammar_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    grouped = grammar.list_all_topics()
+    if not grouped:
+        await update.message.reply_text("文法資料庫尚未初始化，請聯絡管理員執行 init_grammar.py。")
+        return
+
+    lines = []
+    for category, topics in grouped.items():
+        lines.append(f"📚 {category}")
+        for t in topics:
+            lines.append(f"  • {t['name_zh']}（{t['name_en']}）")
+        lines.append("")
+    await update.message.reply_text("\n".join(lines).strip())
 
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -106,6 +140,8 @@ def main() -> None:
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("list", list_vocab))
     app.add_handler(CommandHandler("export", export_vocab))
+    app.add_handler(CommandHandler("review", review_grammar))
+    app.add_handler(CommandHandler("grammarlist", grammar_list))
     app.add_handler(MessageHandler(filters.Document.ALL, handle_document))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.add_error_handler(error_handler)

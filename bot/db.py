@@ -37,4 +37,12 @@ def init_db() -> None:
                 explanation TEXT NOT NULL,
                 queried_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+
+            CREATE TABLE IF NOT EXISTS grammar_topics (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name_zh TEXT NOT NULL UNIQUE,
+                name_en TEXT NOT NULL,
+                category TEXT NOT NULL,
+                content TEXT NOT NULL
+            );
         """)
