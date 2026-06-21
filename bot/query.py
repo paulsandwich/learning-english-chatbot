@@ -99,8 +99,8 @@ def _call_gemini(system_prompt: str, user_message: str) -> str:
             )
             return response.text.strip()
         except Exception as e:
-            if "429" in str(e) and attempt == 0:
-                time.sleep(5)
+            if any(code in str(e) for code in ("429", "503")) and attempt == 0:
+                time.sleep(10)
                 continue
             raise
 
