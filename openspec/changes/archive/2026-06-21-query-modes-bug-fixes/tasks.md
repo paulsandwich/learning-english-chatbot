@@ -25,12 +25,11 @@
 
 ## 5. Verification
 
-- [ ] 5.1 Start the bot and upload a transcript; query a word that appears in the transcript — confirm context is found
-- [ ] 5.2 Query the same word before uploading transcript, then upload and query again — confirm stale cache is cleared
-- [ ] 5.3 Input a single word (e.g., `accomplish`) — confirm KK phonetic appears on first line
-- [ ] 5.4 Input a compound noun (e.g., `blue jay`) — confirm KK phonetic on first line
-- [ ] 5.5 Input a phrasal verb (e.g., `back down`) — confirm usage examples appear
-- [ ] 5.6 Input a sentence with `文法` (e.g., `She has been running since morning 文法`) — confirm grammar breakdown appears
-- [ ] 5.7 Paste a multi-line passage — confirm overall meaning + key phrases appear, no crash
-- [ ] 5.8 Input text with FTS5 special characters (e.g., `give: up`) — confirm no crash, graceful response
-<!-- 5.1–5.8 require manual testing with a running bot -->
+- [x] 5.1 Start the bot and upload a transcript; query a word that appears in the transcript — confirm context is found
+- [x] 5.2 Query the same word before uploading transcript, then upload and query again — confirm stale cache is cleared
+- [x] 5.3 Input a single word (e.g., `accomplish`) — confirm KK phonetic appears on first line
+- [x] 5.4 Input a compound noun (e.g., `blue jay`) — confirm KK phonetic on first line
+- [x] 5.5 Input a phrasal verb (e.g., `back down`) — confirm usage examples appear
+- [x] 5.6 Input a sentence with `文法` (e.g., `She has been running since morning 文法`) — confirm grammar breakdown appears
+- [x] 5.7 Paste a multi-line passage — confirm overall meaning + key phrases appear, no crash
+- [x] 5.8 Input text with FTS5 special characters (e.g., `give: up`) — confirm no crash, graceful response
