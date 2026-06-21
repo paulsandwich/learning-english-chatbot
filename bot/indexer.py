@@ -20,6 +20,10 @@ def index_transcript(file_path: str | Path, episode_name: str) -> int:
             [(episode_name, i, s) for i, s in enumerate(sentences)],
         )
         conn.execute("DELETE FROM cache WHERE context_sentence IS NULL")
+        conn.execute(
+            "INSERT OR REPLACE INTO episodes (episode_name, sentence_count, uploaded_at) VALUES (?, ?, CURRENT_TIMESTAMP)",
+            (episode_name, len(sentences)),
+        )
 
     return len(sentences)
 
