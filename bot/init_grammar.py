@@ -15,13 +15,11 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 # 模型依序嘗試；免費配額耗盡時自動切換到下一個
 MODELS = [
-    "gemini-2.5-flash",
-    "gemini-2.5-flash-lite",
-    "gemini-3-flash-preview",
     "gemini-3.1-flash-lite",
     "gemini-3.5-flash",
-    "gemma-4-26b-a4b-it",
-    "gemma-4-31b-it",
+    "gemini-3-flash-preview",
+    "gemini-2.5-flash-lite",
+    "gemini-2.5-flash",
 ]
 
 TOPICS = [
