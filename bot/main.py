@@ -12,7 +12,7 @@ from telegram.ext import (
     filters,
 )
 
-from bot.db import init_db
+from bot.db import init_db, get_conn
 from bot import indexer, query, vocab, grammar
 
 load_dotenv()
@@ -30,6 +30,7 @@ START_TEXT = """👋 歡迎使用 Podcast 英文學習 Bot！
 指令：
 /list — 查看最近查過的 50 個單字
 /export — 匯出完整單字本
+/transcripts — 列出已上傳的逐字稿
 /review <關鍵字> — 查詢英文文法（例：/review 現在完成式）
 /grammarlist — 列出所有文法主題
 /start — 顯示此說明"""
@@ -88,6 +89,21 @@ async def grammar_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     await update.message.reply_text("\n".join(lines).strip())
 
 
+async def list_transcripts(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT episode_name, sentence_count, uploaded_at FROM episodes ORDER BY episode_name"
+        ).fetchall()
+    if not rows:
+        await update.message.reply_text("尚未上傳任何逐字稿。")
+        return
+    lines = [f"📄 已上傳的逐字稿（共 {len(rows)} 份）\n"]
+    for r in rows:
+        date = r["uploaded_at"][:10] if r["uploaded_at"] else "-"
+        lines.append(f"{r['episode_name']}（{r['sentence_count']} 句）｜{date}")
+    await update.message.reply_text("\n".join(lines))
+
+
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     word = update.message.text.strip()
     if not word:
@@ -142,6 +158,7 @@ def main() -> None:
     app.add_handler(CommandHandler("export", export_vocab))
     app.add_handler(CommandHandler("review", review_grammar))
     app.add_handler(CommandHandler("grammarlist", grammar_list))
+    app.add_handler(CommandHandler("transcripts", list_transcripts))
     app.add_handler(MessageHandler(filters.Document.ALL, handle_document))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.add_error_handler(error_handler)
