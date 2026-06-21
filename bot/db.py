@@ -45,4 +45,16 @@ def init_db() -> None:
                 category TEXT NOT NULL,
                 content TEXT NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS episodes (
+                episode_name TEXT PRIMARY KEY,
+                sentence_count INTEGER NOT NULL,
+                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        """)
+        conn.execute("""
+            INSERT OR IGNORE INTO episodes (episode_name, sentence_count)
+            SELECT c0, COUNT(*)
+            FROM sentences_content
+            GROUP BY c0
         """)
