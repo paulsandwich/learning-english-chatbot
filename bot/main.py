@@ -92,7 +92,7 @@ async def grammar_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def list_transcripts(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     with get_conn() as conn:
         rows = conn.execute(
-            "SELECT episode_name, sentence_count, uploaded_at FROM episodes ORDER BY episode_name"
+            "SELECT episode_name, sentence_count, uploaded_at FROM episodes ORDER BY episode_name DESC"
         ).fetchall()
     if not rows:
         await update.message.reply_text("尚未上傳任何逐字稿。")
