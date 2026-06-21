@@ -25,17 +25,17 @@
 
 ## 5. Run init_grammar.py
 
-- [ ] 5.1 Run `init_grammar.py` locally to populate grammar_topics in local DB
-- [ ] 5.2 Copy `bot/db.py`, `bot/grammar.py`, `bot/init_grammar.py`, `bot/main.py` to GCP VM
-- [ ] 5.3 Run `init_grammar.py` on GCP VM to populate remote DB
-- [ ] 5.4 Restart `podcast-bot` service on GCP VM
+- [x] 5.1 Run `init_grammar.py` locally to populate grammar_topics in local DB
+- [x] 5.2 Copy `bot/db.py`, `bot/grammar.py`, `bot/init_grammar.py`, `bot/main.py` to GCP VM
+- [x] 5.3 Run `init_grammar.py` on GCP VM to populate remote DB
+- [x] 5.4 Restart `podcast-bot` service on GCP VM
 
 ## 6. Verification
 
-- [ ] 6.1 `/grammarlist` — confirm all 39 topics appear grouped by category
-- [ ] 6.2 `/review 完成` — confirm candidate list with 6 entries
-- [ ] 6.3 `/review 現在完成式` — confirm full format with all 6 sections
-- [ ] 6.4 `/review present perfect` — confirm English keyword matches
-- [ ] 6.5 `/review xyz123` — confirm not-found message with /grammarlist hint
-- [ ] 6.6 `/review wish` — confirm wish / if only 句型 appears
-- [ ] 6.7 `/review question tag` — confirm 附加問句 appears
+- [x] 6.1 `/grammarlist` — confirm all 39 topics appear grouped by category
+- [x] 6.2 `/review 完成` — confirm candidate list with 6 entries
+- [x] 6.3 `/review 現在完成式` — confirm full format with all 6 sections
+- [x] 6.4 `/review present perfect` — confirm English keyword matches
+- [x] 6.5 `/review xyz123` — confirm not-found message with /grammarlist hint
+- [x] 6.6 `/review wish` — confirm wish / if only 句型 appears
+- [x] 6.7 `/review question tag` — confirm 附加問句 appears
