@@ -8,6 +8,24 @@ from bot.indexer import search_context
 
 GRAMMAR_KEYWORDS = ['文法', '語法', 'grammar']
 
+MODELS = [
+    "gemini-3.1-flash-lite",
+    "gemini-3.5-flash",
+    "gemini-3-flash-preview",
+    "gemini-2.5-flash-lite",
+    "gemini-2.5-flash",
+]
+
+_model_idx = 0
+
+
+def _is_daily_quota_exhausted(e: Exception) -> bool:
+    return "GenerateRequestsPerDayPerProjectPerModel-FreeTier" in str(e)
+
+
+def _is_rate_limit(e: Exception) -> bool:
+    return ("429" in str(e) or "503" in str(e)) and not _is_daily_quota_exhausted(e)
+
 PROMPT_TERM = """你是英文學習助手。用戶輸入一個英文單字、複合名詞或片語。
 回覆格式（嚴格遵守）：
 第一行：單字/片語 + KK音標，例如：accomplish /əˈkɑmplɪʃ/
@@ -88,23 +106,29 @@ def _strip_grammar_keywords(text: str) -> str:
 
 
 def _call_gemini(system_prompt: str, user_message: str) -> str:
+    global _model_idx
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
-    for attempt in range(2):
-        try:
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=user_message,
-                config=types.GenerateContentConfig(system_instruction=system_prompt),
-            )
-            return response.text.strip()
-        except Exception as e:
-            if any(code in str(e) for code in ("429", "503")) and attempt == 0:
-                time.sleep(10)
-                continue
-            raise
+    while _model_idx < len(MODELS):
+        model = MODELS[_model_idx]
+        for attempt in range(2):
+            try:
+                response = client.models.generate_content(
+                    model=model,
+                    contents=user_message,
+                    config=types.GenerateContentConfig(system_instruction=system_prompt),
+                )
+                return response.text.strip()
+            except Exception as e:
+                if _is_daily_quota_exhausted(e):
+                    _model_idx += 1
+                    break
+                if _is_rate_limit(e) and attempt == 0:
+                    time.sleep(15)
+                    continue
+                raise
 
-    raise RuntimeError("Gemini API 呼叫失敗")
+    raise RuntimeError("所有模型配額皆已耗盡")
 
 
 def explain(word: str) -> str:
