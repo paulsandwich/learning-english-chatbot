@@ -7,6 +7,7 @@ from bot.db import get_conn
 from bot.indexer import search_context
 
 GRAMMAR_KEYWORDS = ['文法', '語法', 'grammar']
+TRANSLATION_KEYWORDS = ['翻譯', 'translate']
 
 MODELS = [
     "gemini-3.1-flash-lite",
@@ -82,12 +83,25 @@ PROMPT_PASSAGE = """你是英文學習助手。用戶輸入一段英文對話或
 • "詞句" — 中文解釋
 不可超出以上格式。不加其他說明或補充。"""
 
+PROMPT_TRANSLATION = """你是英文學習助手。用戶輸入一段英文對話或文章段落（可能附有中文翻譯請求說明，請忽略中文指令，只針對英文內容處理）。
+回覆格式（嚴格遵守）：
+翻譯：
+（直接翻譯整段英文，逐句對應，保留說話者名稱如 DUBNER: 等）
+
+重點詞句：
+• "詞句" — 中文解釋
+• "詞句" — 中文解釋
+• "詞句" — 中文解釋
+不可超出以上格式。不加其他說明或補充。"""
+
 
 def _normalize(word: str) -> str:
     return word.lower().strip()
 
 
 def _detect_mode(text: str) -> str:
+    if any(kw in text for kw in TRANSLATION_KEYWORDS):
+        return 'translation'
     if '\n' in text:
         return 'passage'
     lower = text.lower()
@@ -133,6 +147,10 @@ def _call_gemini(system_prompt: str, user_message: str) -> str:
 
 def explain(word: str) -> str:
     mode = _detect_mode(word)
+
+    if mode == 'translation':
+        user_message = f'段落內容：\n{word}'
+        return _call_gemini(PROMPT_TRANSLATION, user_message)
 
     if mode == 'passage':
         user_message = f'段落內容：\n{word}'
